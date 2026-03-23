@@ -1,6 +1,8 @@
-import sys
 import subprocess
+import sys
+
 from dotenv import load_dotenv
+
 
 def main():
     """
@@ -9,6 +11,7 @@ def main():
     load_dotenv()
     print(".env 文件已加载，正在准备执行签到脚本...")
     subprocess.run([sys.executable, "nodeseek_sign.py"])
+
 
 if __name__ == "__main__":
     main()

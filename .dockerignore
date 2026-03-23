@@ -1,8 +1,42 @@
+# Git internals
 .git
 .github
+
+# Virtual environment
 .venv
+venv
+
+# Python cache
 __pycache__/
-*.pyc
+*.py[cod]
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# Dev-only files
 .dockerignore
 Dockerfile
+.pre-commit-config.yaml
+pyproject.toml
+requirements-dev.txt
+CONTRIBUTING.md
+CHANGELOG.md
+SECURITY.md
 README.md
+CLOUDFLARE_WORKER_README.md
+nodeseek-cloudflare-worker.js
+
+# Local config / secrets
+.env
+cookie/*.txt
+
+# Docs (not needed at runtime)
+docs/
+
+# Test helpers
+test_run.py

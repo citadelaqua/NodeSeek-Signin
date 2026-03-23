@@ -1,17 +1,16 @@
 #!/usr/bin/env python3
-# _*_ coding:utf-8 _*_
 import base64
 import hashlib
 import hmac
 import json
 import os
 import re
+import smtplib
 import threading
 import time
 import urllib.parse
-import smtplib
-from email.mime.text import MIMEText
 from email.header import Header
+from email.mime.text import MIMEText
 from email.utils import formataddr
 
 import requests
@@ -138,9 +137,9 @@ def bark(title: str, content: str) -> None:
     print("bark 服务启动")
 
     if push_config.get("BARK_PUSH").startswith("http"):
-        url = f'{push_config.get("BARK_PUSH")}/{urllib.parse.quote_plus(title)}/{urllib.parse.quote_plus(content)}'
+        url = f"{push_config.get('BARK_PUSH')}/{urllib.parse.quote_plus(title)}/{urllib.parse.quote_plus(content)}"
     else:
-        url = f'https://api.day.app/{push_config.get("BARK_PUSH")}/{urllib.parse.quote_plus(title)}/{urllib.parse.quote_plus(content)}'
+        url = f"https://api.day.app/{push_config.get('BARK_PUSH')}/{urllib.parse.quote_plus(title)}/{urllib.parse.quote_plus(content)}"
 
     bark_params = {
         "BARK_ARCHIVE": "isArchive",
@@ -152,10 +151,9 @@ def bark(title: str, content: str) -> None:
     }
     params = ""
     for pair in filter(
-        lambda pairs: pairs[0].startswith("BARK_")
-        and pairs[0] != "BARK_PUSH"
-        and pairs[1]
-        and bark_params.get(pairs[0]),
+        lambda pairs: (
+            pairs[0].startswith("BARK_") and pairs[0] != "BARK_PUSH" and pairs[1] and bark_params.get(pairs[0])
+        ),
         push_config.items(),
     ):
         params += f"{bark_params.get(pair[0])}={pair[1]}&"
@@ -189,16 +187,12 @@ def dingding_bot(title: str, content: str) -> None:
     secret_enc = push_config.get("DD_BOT_SECRET").encode("utf-8")
     string_to_sign = "{}\n{}".format(timestamp, push_config.get("DD_BOT_SECRET"))
     string_to_sign_enc = string_to_sign.encode("utf-8")
-    hmac_code = hmac.new(
-        secret_enc, string_to_sign_enc, digestmod=hashlib.sha256
-    ).digest()
+    hmac_code = hmac.new(secret_enc, string_to_sign_enc, digestmod=hashlib.sha256).digest()
     sign = urllib.parse.quote_plus(base64.b64encode(hmac_code))
-    url = f'https://oapi.dingtalk.com/robot/send?access_token={push_config.get("DD_BOT_TOKEN")}&timestamp={timestamp}&sign={sign}'
+    url = f"https://oapi.dingtalk.com/robot/send?access_token={push_config.get('DD_BOT_TOKEN')}&timestamp={timestamp}&sign={sign}"
     headers = {"Content-Type": "application/json;charset=utf-8"}
     data = {"msgtype": "text", "text": {"content": f"{title}\n\n{content}"}}
-    response = requests.post(
-        url=url, data=json.dumps(data), headers=headers, timeout=15
-    ).json()
+    response = requests.post(url=url, data=json.dumps(data), headers=headers, timeout=15).json()
 
     if not response["errcode"]:
         print("钉钉机器人 推送成功！")
@@ -215,7 +209,7 @@ def feishu_bot(title: str, content: str) -> None:
         return
     print("飞书 服务启动")
 
-    url = f'https://open.feishu.cn/open-apis/bot/v2/hook/{push_config.get("FSKEY")}'
+    url = f"https://open.feishu.cn/open-apis/bot/v2/hook/{push_config.get('FSKEY')}"
     data = {"msg_type": "text", "content": {"text": f"{title}\n\n{content}"}}
     response = requests.post(url, data=json.dumps(data)).json()
 
@@ -234,7 +228,7 @@ def go_cqhttp(title: str, content: str) -> None:
         return
     print("go-cqhttp 服务启动")
 
-    url = f'{push_config.get("GOBOT_URL")}?access_token={push_config.get("GOBOT_TOKEN")}&{push_config.get("GOBOT_QQ")}&message=标题:{title}\n内容:{content}'
+    url = f"{push_config.get('GOBOT_URL')}?access_token={push_config.get('GOBOT_TOKEN')}&{push_config.get('GOBOT_QQ')}&message=标题:{title}\n内容:{content}"
     response = requests.get(url).json()
 
     if response["status"] == "ok":
@@ -252,7 +246,7 @@ def gotify(title: str, content: str) -> None:
         return
     print("gotify 服务启动")
 
-    url = f'{push_config.get("GOTIFY_URL")}/message?token={push_config.get("GOTIFY_TOKEN")}'
+    url = f"{push_config.get('GOTIFY_URL')}/message?token={push_config.get('GOTIFY_TOKEN')}"
     data = {
         "title": title,
         "message": content,
@@ -275,7 +269,7 @@ def iGot(title: str, content: str) -> None:
         return
     print("iGot 服务启动")
 
-    url = f'https://push.hellyw.com/{push_config.get("IGOT_PUSH_KEY")}'
+    url = f"https://push.hellyw.com/{push_config.get('IGOT_PUSH_KEY')}"
     data = {"title": title, "content": content}
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
     response = requests.post(url, data=data, headers=headers).json()
@@ -283,7 +277,7 @@ def iGot(title: str, content: str) -> None:
     if response["ret"] == 0:
         print("iGot 推送成功！")
     else:
-        print(f'iGot 推送失败！{response["errMsg"]}')
+        print(f"iGot 推送失败！{response['errMsg']}")
 
 
 def serverJ(title: str, content: str) -> None:
@@ -297,15 +291,15 @@ def serverJ(title: str, content: str) -> None:
 
     data = {"text": title, "desp": content.replace("\n", "\n\n")}
     if push_config.get("PUSH_KEY").find("SCT") != -1:
-        url = f'https://sctapi.ftqq.com/{push_config.get("PUSH_KEY")}.send'
+        url = f"https://sctapi.ftqq.com/{push_config.get('PUSH_KEY')}.send"
     else:
-        url = f'https://sc.ftqq.com/{push_config.get("PUSH_KEY")}.send'
+        url = f"https://sc.ftqq.com/{push_config.get('PUSH_KEY')}.send"
     response = requests.post(url, data=data).json()
 
     if response.get("errno") == 0 or response.get("code") == 0:
         print("serverJ 推送成功！")
     else:
-        print(f'serverJ 推送失败！错误码：{response["message"]}')
+        print(f"serverJ 推送失败！错误码：{response['message']}")
 
 
 def pushdeer(title: str, content: str) -> None:
@@ -386,6 +380,7 @@ def pushplus_bot(title: str, content: str) -> None:
         else:
             print("PUSHPLUS 推送失败！")
 
+
 def weplus_bot(title: str, content: str) -> None:
     """
     通过 微加机器人 推送消息。
@@ -397,7 +392,7 @@ def weplus_bot(title: str, content: str) -> None:
 
     template = "txt"
     if len(content) > 800:
-      template = "html"
+        template = "html"
 
     url = "https://www.weplusbot.com/send"
     data = {
@@ -427,14 +422,14 @@ def qmsg_bot(title: str, content: str) -> None:
         return
     print("qmsg 服务启动")
 
-    url = f'https://qmsg.zendee.cn/{push_config.get("QMSG_TYPE")}/{push_config.get("QMSG_KEY")}'
-    payload = {"msg": f'{title}\n\n{content.replace("----", "-")}'.encode("utf-8")}
+    url = f"https://qmsg.zendee.cn/{push_config.get('QMSG_TYPE')}/{push_config.get('QMSG_KEY')}"
+    payload = {"msg": f"{title}\n\n{content.replace('----', '-')}".encode()}
     response = requests.post(url=url, params=payload).json()
 
     if response["code"] == 0:
         print("qmsg 推送成功！")
     else:
-        print(f'qmsg 推送失败！{response["reason"]}')
+        print(f"qmsg 推送失败！{response['reason']}")
 
 
 def wecom_app(title: str, content: str) -> None:
@@ -492,9 +487,7 @@ class WeCom:
         return data["access_token"]
 
     def send_text(self, message, touser="@all"):
-        send_url = (
-            f"{self.ORIGIN}/cgi-bin/message/send?access_token={self.get_access_token()}"
-        )
+        send_url = f"{self.ORIGIN}/cgi-bin/message/send?access_token={self.get_access_token()}"
         send_values = {
             "touser": touser,
             "msgtype": "text",
@@ -508,9 +501,7 @@ class WeCom:
         return respone["errmsg"]
 
     def send_mpnews(self, title, message, media_id, touser="@all"):
-        send_url = (
-            f"{self.ORIGIN}/cgi-bin/message/send?access_token={self.get_access_token()}"
-        )
+        send_url = f"{self.ORIGIN}/cgi-bin/message/send?access_token={self.get_access_token()}"
         send_values = {
             "touser": touser,
             "msgtype": "mpnews",
@@ -550,9 +541,7 @@ def wecom_bot(title: str, content: str) -> None:
     url = f"{origin}/cgi-bin/webhook/send?key={push_config.get('QYWX_KEY')}"
     headers = {"Content-Type": "application/json;charset=utf-8"}
     data = {"msgtype": "text", "text": {"content": f"{title}\n\n{content}"}}
-    response = requests.post(
-        url=url, data=json.dumps(data), headers=headers, timeout=15
-    ).json()
+    response = requests.post(url=url, data=json.dumps(data), headers=headers, timeout=15).json()
 
     if response["errcode"] == 0:
         print("企业微信机器人推送成功！")
@@ -572,9 +561,7 @@ def telegram_bot(title: str, content: str) -> None:
     if push_config.get("TG_API_HOST"):
         url = f"{push_config.get('TG_API_HOST')}/bot{push_config.get('TG_BOT_TOKEN')}/sendMessage"
     else:
-        url = (
-            f"https://api.telegram.org/bot{push_config.get('TG_BOT_TOKEN')}/sendMessage"
-        )
+        url = f"https://api.telegram.org/bot{push_config.get('TG_BOT_TOKEN')}/sendMessage"
     headers = {"Content-Type": "application/x-www-form-urlencoded"}
     payload = {
         "chat_id": str(push_config.get("TG_USER_ID")),
@@ -584,21 +571,11 @@ def telegram_bot(title: str, content: str) -> None:
     }
     proxies = None
     if push_config.get("TG_PROXY_HOST") and push_config.get("TG_PROXY_PORT"):
-        if push_config.get("TG_PROXY_AUTH") is not None and "@" not in push_config.get(
-            "TG_PROXY_HOST"
-        ):
-            push_config["TG_PROXY_HOST"] = (
-                push_config.get("TG_PROXY_AUTH")
-                + "@"
-                + push_config.get("TG_PROXY_HOST")
-            )
-        proxyStr = "http://{}:{}".format(
-            push_config.get("TG_PROXY_HOST"), push_config.get("TG_PROXY_PORT")
-        )
+        if push_config.get("TG_PROXY_AUTH") is not None and "@" not in push_config.get("TG_PROXY_HOST"):
+            push_config["TG_PROXY_HOST"] = push_config.get("TG_PROXY_AUTH") + "@" + push_config.get("TG_PROXY_HOST")
+        proxyStr = "http://{}:{}".format(push_config.get("TG_PROXY_HOST"), push_config.get("TG_PROXY_PORT"))
         proxies = {"http": proxyStr, "https": proxyStr}
-    response = requests.post(
-        url=url, headers=headers, params=payload, proxies=proxies
-    ).json()
+    response = requests.post(url=url, headers=headers, params=payload, proxies=proxies).json()
 
     if response["ok"]:
         print("tg 推送成功！")
@@ -610,14 +587,8 @@ def aibotk(title: str, content: str) -> None:
     """
     使用 智能微秘书 推送消息。
     """
-    if (
-        not push_config.get("AIBOTK_KEY")
-        or not push_config.get("AIBOTK_TYPE")
-        or not push_config.get("AIBOTK_NAME")
-    ):
-        print(
-            "智能微秘书 的 AIBOTK_KEY 或者 AIBOTK_TYPE 或者 AIBOTK_NAME 未设置!!\n取消推送"
-        )
+    if not push_config.get("AIBOTK_KEY") or not push_config.get("AIBOTK_TYPE") or not push_config.get("AIBOTK_NAME"):
+        print("智能微秘书 的 AIBOTK_KEY 或者 AIBOTK_TYPE 或者 AIBOTK_NAME 未设置!!\n取消推送")
         return
     print("智能微秘书 服务启动")
 
@@ -642,7 +613,7 @@ def aibotk(title: str, content: str) -> None:
     if response["code"] == 0:
         print("智能微秘书 推送成功！")
     else:
-        print(f'智能微秘书 推送失败！{response["error"]}')
+        print(f"智能微秘书 推送失败！{response['error']}")
 
 
 def smtp(title: str, content: str) -> None:
@@ -683,9 +654,7 @@ def smtp(title: str, content: str) -> None:
             if push_config.get("SMTP_SSL") == "true"
             else smtplib.SMTP(push_config.get("SMTP_SERVER"))
         )
-        smtp_server.login(
-            push_config.get("SMTP_EMAIL"), push_config.get("SMTP_PASSWORD")
-        )
+        smtp_server.login(push_config.get("SMTP_EMAIL"), push_config.get("SMTP_PASSWORD"))
         smtp_server.sendmail(
             push_config.get("SMTP_EMAIL"),
             push_config.get("SMTP_EMAIL"),
@@ -739,10 +708,10 @@ def chronocat(title: str, content: str) -> None:
     user_ids = re.findall(r"user_id=(\d+)", push_config.get("CHRONOCAT_QQ"))
     group_ids = re.findall(r"group_id=(\d+)", push_config.get("CHRONOCAT_QQ"))
 
-    url = f'{push_config.get("CHRONOCAT_URL")}/api/message/send'
+    url = f"{push_config.get('CHRONOCAT_URL')}/api/message/send"
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f'Bearer {push_config.get("CHRONOCAT_TOKEN")}',
+        "Authorization": f"Bearer {push_config.get('CHRONOCAT_TOKEN')}",
     }
 
     for chat_type, ids in [(1, user_ids), (2, group_ids)]:
@@ -800,7 +769,7 @@ def parse_string(input_string, value_format_fn=None):
             value = value_format_fn(value) if value_format_fn else value
             json_value = json.loads(value)
             matches[key] = json_value
-        except:
+        except (ValueError, TypeError):
             matches[key] = value
     return matches
 
@@ -848,12 +817,10 @@ def custom_notify(title: str, content: str) -> None:
         WEBHOOK_CONTENT_TYPE,
         lambda v: v.replace("$title", title).replace("$content", content),
     )
-    formatted_url = WEBHOOK_URL.replace(
-        "$title", urllib.parse.quote_plus(title)
-    ).replace("$content", urllib.parse.quote_plus(content))
-    response = requests.request(
-        method=WEBHOOK_METHOD, url=formatted_url, headers=headers, timeout=15, data=body
+    formatted_url = WEBHOOK_URL.replace("$title", urllib.parse.quote_plus(title)).replace(
+        "$content", urllib.parse.quote_plus(content)
     )
+    response = requests.request(method=WEBHOOK_METHOD, url=formatted_url, headers=headers, timeout=15, data=body)
 
     if response.status_code == 200:
         print("自定义通知推送成功！")
@@ -905,11 +872,7 @@ def add_notify_function():
         notify_function.append(wecom_bot)
     if push_config.get("TG_BOT_TOKEN") and push_config.get("TG_USER_ID"):
         notify_function.append(telegram_bot)
-    if (
-        push_config.get("AIBOTK_KEY")
-        and push_config.get("AIBOTK_TYPE")
-        and push_config.get("AIBOTK_NAME")
-    ):
+    if push_config.get("AIBOTK_KEY") and push_config.get("AIBOTK_TYPE") and push_config.get("AIBOTK_NAME"):
         notify_function.append(aibotk)
     if (
         push_config.get("SMTP_SERVER")
@@ -921,17 +884,13 @@ def add_notify_function():
         notify_function.append(smtp)
     if push_config.get("PUSHME_KEY"):
         notify_function.append(pushme)
-    if (
-        push_config.get("CHRONOCAT_URL")
-        and push_config.get("CHRONOCAT_QQ")
-        and push_config.get("CHRONOCAT_TOKEN")
-    ):
+    if push_config.get("CHRONOCAT_URL") and push_config.get("CHRONOCAT_QQ") and push_config.get("CHRONOCAT_TOKEN"):
         notify_function.append(chronocat)
     if push_config.get("WEBHOOK_URL") and push_config.get("WEBHOOK_METHOD"):
         notify_function.append(custom_notify)
 
     if not notify_function:
-        print(f"无推送渠道，请检查通知变量是否正确")
+        print("无推送渠道，请检查通知变量是否正确")
     return notify_function
 
 
@@ -948,20 +907,16 @@ def send(title: str, content: str, ignore_default_config: bool = False, **kwargs
         return
 
     # 根据标题跳过一些消息推送，环境变量：SKIP_PUSH_TITLE 用回车分隔
-    skipTitle = os.getenv("SKIP_PUSH_TITLE")
-    if skipTitle:
-        if title in re.split("\n", skipTitle):
-            print(f"{title} 在SKIP_PUSH_TITLE环境变量内，跳过推送！")
-            return
+    skip_title = os.getenv("SKIP_PUSH_TITLE")
+    if skip_title and title in re.split("\n", skip_title):
+        print(f"{title} 在SKIP_PUSH_TITLE环境变量内，跳过推送！")
+        return
 
     hitokoto = push_config.get("HITOKOTO")
     content += "\n\n" + one() if hitokoto else ""
 
     notify_function = add_notify_function()
-    ts = [
-        threading.Thread(target=mode, args=(title, content), name=mode.__name__)
-        for mode in notify_function
-    ]
+    ts = [threading.Thread(target=mode, args=(title, content), name=mode.__name__) for mode in notify_function]
     [t.start() for t in ts]
     [t.join() for t in ts]
 

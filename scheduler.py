@@ -1,17 +1,18 @@
+import datetime
 import os
+import random
+import re
+import subprocess
 import sys
 import time
-import datetime
-import random
-import subprocess
-import re
-from datetime import timezone, timedelta
+from datetime import timedelta, timezone
 
 # 测试程序时使用
 # from dotenv import load_dotenv
 # load_dotenv()
 
 GMT8 = timezone(timedelta(hours=8))
+
 
 def get_run_config():
     """
@@ -21,21 +22,22 @@ def get_run_config():
     - 未设置或格式错误: 默认为 '08:00-10:59'
     返回一个元组 (mode, value)
     """
-    run_at_env = os.environ.get('RUN_AT', '08:00-10:59')
+    run_at_env = os.environ.get("RUN_AT", "08:00-10:59")
 
-    if re.fullmatch(r'\d{2}:\d{2}', run_at_env):
+    if re.fullmatch(r"\d{2}:\d{2}", run_at_env):
         print(f"检测到固定时间模式: {run_at_env}", flush=True)
-        return 'fixed', run_at_env
-    
-    if re.fullmatch(r'\d{2}:\d{2}-\d{2}:\d{2}', run_at_env):
-        print(f"检测到随机时间范围模式: {run_at_env}", flush=True)
-        return 'range', run_at_env
+        return "fixed", run_at_env
 
-    if os.environ.get('RUN_AT'):
+    if re.fullmatch(r"\d{2}:\d{2}-\d{2}:\d{2}", run_at_env):
+        print(f"检测到随机时间范围模式: {run_at_env}", flush=True)
+        return "range", run_at_env
+
+    if os.environ.get("RUN_AT"):
         print(f"警告: 环境变量 RUN_AT 的格式 '{run_at_env}' 无效。", flush=True)
-    
+
     print("将使用默认随机时间范围 '08:00-10:59'。", flush=True)
-    return 'range', '08:00-10:59'
+    return "range", "08:00-10:59"
+
 
 def calculate_next_run_time(mode, value):
     """
@@ -44,28 +46,25 @@ def calculate_next_run_time(mode, value):
     """
     now = datetime.datetime.now(GMT8)
 
-    if mode == 'fixed':
-        h, m = map(int, value.split(':'))
+    if mode == "fixed":
+        h, m = map(int, value.split(":"))
         next_run_attempt = now.replace(hour=h, minute=m, second=0, microsecond=0)
         if next_run_attempt > now:
             return next_run_attempt
         else:
             return next_run_attempt + datetime.timedelta(days=1)
 
-    elif mode == 'range':
-        start_str, end_str = value.split('-')
-        start_h, start_m = map(int, start_str.split(':'))
-        end_h, end_m = map(int, end_str.split(':'))
-        
+    elif mode == "range":
+        start_str, end_str = value.split("-")
+        start_h, start_m = map(int, start_str.split(":"))
+        end_h, end_m = map(int, end_str.split(":"))
+
         start_time = datetime.time(start_h, start_m)
         end_time = datetime.time(end_h, end_m)
 
         start_today = now.replace(hour=start_h, minute=start_m, second=0, microsecond=0)
 
-        if now < start_today:
-            target_date = now.date()
-        else:
-            target_date = now.date() + datetime.timedelta(days=1)
+        target_date = now.date() if now < start_today else now.date() + datetime.timedelta(days=1)
 
         start_target = datetime.datetime.combine(target_date, start_time, tzinfo=GMT8)
         end_target = datetime.datetime.combine(target_date, end_time, tzinfo=GMT8)
@@ -75,9 +74,10 @@ def calculate_next_run_time(mode, value):
 
         start_timestamp = int(start_target.timestamp())
         end_timestamp = int(end_target.timestamp())
-        
+
         random_timestamp = random.randint(start_timestamp, end_timestamp)
         return datetime.datetime.fromtimestamp(random_timestamp, tz=GMT8)
+
 
 def run_checkin_task():
     """
@@ -94,6 +94,7 @@ def run_checkin_task():
     except Exception as e:
         print(f"执行签到任务时发生未知错误: {e}", flush=True)
 
+
 def main():
     """
     主调度循环。
@@ -101,7 +102,7 @@ def main():
     print("调度器启动...", flush=True)
     mode, value = get_run_config()
     print(f"调度模式: '{mode}', 配置值: '{value}'", flush=True)
-    
+
     # run_checkin_task() # 启动时执行，用于测试程序
 
     while True:
@@ -120,6 +121,7 @@ def main():
             time.sleep(60)
 
         run_checkin_task()
+
 
 if __name__ == "__main__":
     main()

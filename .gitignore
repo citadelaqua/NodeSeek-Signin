@@ -1,9 +1,33 @@
 # Python virtual environment
 .venv/
+venv/
 
 # Python cache
 __pycache__/
-*.pyc
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+*.egg
+MANIFEST
+
+# Ruff cache
+.ruff_cache/
+
+# MyPy cache
+.mypy_cache/
+
+# Pytest cache
+.pytest_cache/
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
 
 # Sensitive configuration
 .env
@@ -14,8 +38,13 @@ cookie/*
 
 # OS generated files
 .DS_Store
+.DS_Store?
 Thumbs.db
+ehthumbs.db
 
-# IDE/Editor configuration
+# IDE / Editor configuration
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
