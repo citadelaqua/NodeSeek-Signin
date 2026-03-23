@@ -25,7 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Cloudflare Worker 版本（`nodeseek-cloudflare-worker.js`），使用 2captcha 解决验证码
 - 完整的部署文档（`docs/deployment/`）与环境变量手册（`docs/configuration/`）
 - `.env.example` 配置模板
-- `test_run.py` 本地调试入口
+- `run_dev.py` 本地调试入口
 
 [Unreleased]: https://github.com/yowiv/NodeSeek-Signin/compare/v1.0.0...HEAD
 [1.0.0]: https://github.com/yowiv/NodeSeek-Signin/releases/tag/v1.0.0

@@ -37,7 +37,7 @@ cp .env.example .env
 # 编辑 .env 填入你的账号、Cookie、验证码服务信息
 
 # 6. 本地验证签到脚本
-python test_run.py
+python run_dev.py
 ```
 
 ---

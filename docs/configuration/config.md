@@ -82,7 +82,7 @@
 ## 7. 调试与排障建议
 
 1. 利用 `.env.example` 复制生成 `.env`，逐项填值，便于与仓库更新保持同步。
-2. 本地调试可运行 `python test_run.py` 验证配置是否生效；Docker/青龙请先确认 `RUN_AT` 是否在可接受的时段内。
+2. 本地调试可运行 `python run_dev.py` 验证配置是否生效；Docker/青龙请先确认 `RUN_AT` 是否在可接受的时段内。
 3. 如果启用了账号密码但依然无法自动登录，请确认 `SOLVER_TYPE`、`API_BASE_URL`、`CLIENTT_KEY` 是否匹配对应的验证码服务。
 4. 若通知未触发，可在同一个 shell 中临时导出变量后执行 `python notify.py` 做自检。
 
