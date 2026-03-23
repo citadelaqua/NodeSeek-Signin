@@ -1,10 +1,15 @@
+import sys
+from pathlib import Path
+
+# 将当前目录加入 sys.path，保证直接运行（python sign.py）和包模式（python -m nodeseek.sign）均可正常导入同包模块
+sys.path.insert(0, str(Path(__file__).parent))
+
 import os
 import time
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from curl_cffi import requests
-
 from turnstile_solver import TurnstileSolver, TurnstileSolverError
 from yescaptcha import YesCaptchaSolver, YesCaptchaSolverError
 

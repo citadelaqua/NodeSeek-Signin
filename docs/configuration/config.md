@@ -40,7 +40,7 @@
 | `GITHUB_ACTIONS` | 由平台注入 | GitHub Actions 运行器自动提供，脚本据此判断当前是否在 Actions 内运行 |
 | `GITHUB_REPOSITORY` | 由平台注入 | 与 `GH_PAT` 搭配，指明需要写入变量的仓库 |
 
-> 🔁 当 `GH_PAT`、`GITHUB_REPOSITORY` 可用时，`nodeseek_sign.py` 会调用 GitHub API 自动更新仓库变量 `NS_COOKIE`，减少人工维护。
+> 🔁 当 `GH_PAT`、`GITHUB_REPOSITORY` 可用时，`sign.py` 会调用 GitHub API 自动更新仓库变量 `NS_COOKIE`，减少人工维护。
 
 ## 5. 通知推送变量
 

@@ -6,6 +6,7 @@ import subprocess
 import sys
 import time
 from datetime import timedelta, timezone
+from pathlib import Path
 
 # 测试程序时使用
 # from dotenv import load_dotenv
@@ -81,14 +82,15 @@ def calculate_next_run_time(mode, value):
 
 def run_checkin_task():
     """
-    执行 nodeseek_sign.py 脚本。
+    执行 sign.py 脚本。
     """
     print(f"[{datetime.datetime.now(GMT8).strftime('%Y-%m-%d %H:%M:%S')}] 开始执行签到任务...", flush=True)
+    sign_script = str(Path(__file__).parent / "sign.py")
     try:
-        subprocess.run([sys.executable, "nodeseek_sign.py"], check=True)
+        subprocess.run([sys.executable, sign_script], check=True)
         print(f"[{datetime.datetime.now(GMT8).strftime('%Y-%m-%d %H:%M:%S')}] 签到任务执行完毕。", flush=True)
     except FileNotFoundError:
-        print("错误: 'nodeseek_sign.py' 未找到。请确保它与 scheduler.py 位于同一目录。", flush=True)
+        print(f"错误: '{sign_script}' 未找到。请确保 sign.py 与 scheduler.py 位于同一目录。", flush=True)
     except subprocess.CalledProcessError as e:
         print(f"签到任务执行失败，返回码: {e.returncode}", flush=True)
     except Exception as e:

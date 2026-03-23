@@ -12,8 +12,8 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 复制所有 .py 文件到工作目录
-COPY *.py ./
+# 复制 Python 包源码到工作目录（保持扁平结构，脚本间可互相导入）
+COPY src/nodeseek/ ./
 
 # 设置默认启动命令
 CMD ["python", "scheduler.py"]

@@ -41,6 +41,9 @@ Repository = "https://github.com/yowiv/NodeSeek-Signin"
 Issues = "https://github.com/yowiv/NodeSeek-Signin/issues"
 Changelog = "https://github.com/yowiv/NodeSeek-Signin/blob/main/CHANGELOG.md"
 
+[tool.setuptools.packages.find]
+where = ["src"]
+
 # ---------------------------------------------------------------------------
 # Ruff — linter + formatter
 # ---------------------------------------------------------------------------
@@ -65,7 +68,7 @@ ignore = [
 ]
 
 [tool.ruff.lint.isort]
-known-first-party = ["nodeseek_sign", "notify", "turnstile_solver", "yescaptcha", "scheduler"]
+known-first-party = ["nodeseek"]
 
 [tool.ruff.format]
 quote-style = "double"

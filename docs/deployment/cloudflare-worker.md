@@ -39,7 +39,7 @@
 4. 给 Worker 起个名字，如 `nodeseek-signin`
 5. 点击 "部署"
 6. 点击 "编辑代码"
-7. 删除默认代码，复制 `nodeseek-cloudflare-worker.js` 的全部内容
+7. 删除默认代码，复制 `scripts/cloudflare-worker.js` 的全部内容
 8. 点击 "保存并部署"
 
 #### 方式二：使用 Wrangler CLI
@@ -54,7 +54,7 @@ wrangler login
 # 创建 wrangler.toml 配置文件
 cat > wrangler.toml << EOF
 name = "nodeseek-signin"
-main = "nodeseek-cloudflare-worker.js"
+main = "scripts/cloudflare-worker.js"
 compatibility_date = "2024-01-01"
 
 [vars]
@@ -250,7 +250,7 @@ curl -X POST https://your-worker-name.your-subdomain.workers.dev/checkin
 如需更新代码：
 
 1. 编辑 Worker 代码
-2. 替换为新版本的 `nodeseek-cloudflare-worker.js` 内容
+2. 替换为新版本的 `scripts/cloudflare-worker.js` 内容
 3. 点击 "保存并部署"
 
 环境变量无需重新配置。

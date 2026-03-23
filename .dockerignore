@@ -20,7 +20,6 @@ build/
 
 # Dev-only files
 .dockerignore
-Dockerfile
 .pre-commit-config.yaml
 pyproject.toml
 requirements-dev.txt
@@ -28,8 +27,9 @@ CONTRIBUTING.md
 CHANGELOG.md
 SECURITY.md
 README.md
-CLOUDFLARE_WORKER_README.md
-nodeseek-cloudflare-worker.js
+
+# Scripts（CF Worker 不需要打入镜像）
+scripts/
 
 # Local config / secrets
 .env
@@ -40,3 +40,6 @@ docs/
 
 # Test helpers
 test_run.py
+
+# Deploy config（Dockerfile 自身不需要打入镜像）
+deploy/
