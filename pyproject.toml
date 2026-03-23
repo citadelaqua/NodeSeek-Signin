@@ -65,10 +65,11 @@ select = [
 ignore = [
     "E501",  # line-too-long (handled by formatter)
     "B904",  # raise-without-from-inside-except (existing pattern)
+    "B008",  # function-call-in-default-argument — idiomatic FastAPI Depends() pattern
 ]
 
 [tool.ruff.lint.isort]
-known-first-party = ["nodeseek"]
+known-first-party = ["nodeseek", "web"]
 
 [tool.ruff.format]
 quote-style = "double"

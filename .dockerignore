@@ -35,11 +35,9 @@ scripts/
 .env
 cookie/*.txt
 
-# Docs (not needed at runtime)
-docs/
+# Web frontend build artifacts (not needed in CLI image)
+web/frontend/node_modules/
+web/frontend/dist/
 
-# Test helpers
-run_dev.py
-
-# Deploy config（Dockerfile 自身不需要打入镜像）
-deploy/
+# SQLite data (mounted as volume)
+data/

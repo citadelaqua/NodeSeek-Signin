@@ -48,3 +48,9 @@ ehthumbs.db
 *.swp
 *.swo
 *~
+
+# Web panel
+data/*
+!data/.gitkeep
+web/frontend/node_modules/
+web/frontend/dist/

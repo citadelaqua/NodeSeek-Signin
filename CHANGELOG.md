@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-03-23
+
+### Added
+
+- Web 管理面板（`web/`）：FastAPI 后端 + Vue 3 + Tailwind CSS + Chart.js 前端
+- SQLite 持久化签到历史（`data/nodeseek.db`），含 `accounts`、`signin_logs`、`app_config` 三张表
+- REST API（`/api/auth/token`、`/api/accounts`、`/api/signin/trigger`、`/api/signin/logs`、`/api/stats`、`/api/config`、`/api/scheduler/status`）
+- JWT Bearer Token 身份验证，密码由环境变量 `WEB_PASSWORD` 控制
+- 同进程后台调度线程，复用 `src/nodeseek/scheduler.py` 的时间计算逻辑
+- Dashboard 总览页：账号状态卡片、今日鸡腿统计、近 30 天鸡腿折线图（Chart.js）
+- 账号管理页：Cookie / 账号密码两种模式增删改
+- 签到日志页：分页日志表格
+- 配置页：RUN_AT、验证码方案、调度器状态
+- `deploy/Dockerfile.web`：多阶段构建（Node.js 构建前端 + Python 运行时）
+- `deploy/docker-compose.web.yml`：一键启动 Web 面板，含健康检查与数据卷挂载
+- `requirements-web.txt`：Web 专属依赖（fastapi、uvicorn、sqlalchemy、aiosqlite、python-jose、python-multipart）
+- `.env.example` 新增 `WEB_PASSWORD`、`WEB_PORT`、`JWT_SECRET` 配置项
+
 ## [1.0.0] - 2025-02-08
 
 ### Added
@@ -27,5 +45,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `.env.example` 配置模板
 - `run_dev.py` 本地调试入口
 
-[Unreleased]: https://github.com/yowiv/NodeSeek-Signin/compare/v1.0.0...HEAD
+[Unreleased]: https://github.com/yowiv/NodeSeek-Signin/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/yowiv/NodeSeek-Signin/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/yowiv/NodeSeek-Signin/releases/tag/v1.0.0
