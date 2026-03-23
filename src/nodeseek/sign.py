@@ -10,8 +10,8 @@ from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 
 from curl_cffi import requests
-from turnstile_solver import TurnstileSolver, TurnstileSolverError
-from yescaptcha import YesCaptchaSolver, YesCaptchaSolverError
+from turnstile_solver import TurnstileSolver
+from yescaptcha import YesCaptchaSolver
 
 
 def _get_env_str(name: str, default: str = "") -> str:
@@ -174,9 +174,6 @@ def delete_ql_env(var_name: str):
         else:
             print(f"未找到环境变量: {var_name}")
             return True
-    except (TurnstileSolverError, YesCaptchaSolverError) as e:
-        print(f"验证码解析错误: {e}")
-        return None
     except Exception as e:
         print(f"删除环境变量异常: {str(e)}")
         return False

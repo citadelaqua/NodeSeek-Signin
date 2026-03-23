@@ -8,10 +8,6 @@ import time
 from datetime import timedelta, timezone
 from pathlib import Path
 
-# 测试程序时使用
-# from dotenv import load_dotenv
-# load_dotenv()
-
 GMT8 = timezone(timedelta(hours=8))
 
 
@@ -104,8 +100,6 @@ def main():
     print("调度器启动...", flush=True)
     mode, value = get_run_config()
     print(f"调度模式: '{mode}', 配置值: '{value}'", flush=True)
-
-    # run_checkin_task() # 启动时执行，用于测试程序
 
     while True:
         next_run_time = calculate_next_run_time(mode, value)
