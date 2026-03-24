@@ -1,6 +1,6 @@
 """Signin trigger and log endpoints."""
 
-from fastapi import APIRouter, BackgroundTasks, Depends, Query
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -16,11 +16,19 @@ router = APIRouter(prefix="/api/signin", tags=["signin"])
 @router.post("/trigger")
 async def trigger_all(
     background_tasks: BackgroundTasks,
+    db: AsyncSession = Depends(get_db),
     _user: str = Depends(get_current_user),
 ) -> dict:
+    result = await db.execute(select(Account).where(Account.enabled == True))  # noqa: E712
+    enabled_accounts = result.scalars().all()
+    if not enabled_accounts:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="没有可签到的账号，请先添加并启用账号",
+        )
     scheduler = get_scheduler()
     background_tasks.add_task(scheduler.run_signin_all, triggered_by="manual")
-    return {"message": "Sign-in triggered for all enabled accounts"}
+    return {"message": f"Sign-in triggered for {len(enabled_accounts)} enabled account(s)"}
 
 
 @router.post("/trigger/{account_id}")

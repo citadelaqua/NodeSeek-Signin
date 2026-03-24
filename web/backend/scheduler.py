@@ -192,7 +192,26 @@ async def _do_sign(db, account, triggered_by: str) -> None:  # type: ignore[type
         created_at=now,
     )
     db.add(log)
-    logger.info("Account %s (%s): %s — %s", account.id, account.label, result, message)
+
+    _log_signin_result(account, result, message, chickens, triggered_by)
+
+
+def _log_signin_result(account, result: str, message: str, chickens: int | None, triggered_by: str) -> None:
+    """Emit a structured log line for a sign-in attempt."""
+    tag = f"[{triggered_by}] 账号 {account.id}「{account.label}」"
+    if result == "success":
+        chicken_info = f"，获得 {chickens} 个鸡腿" if chickens is not None else ""
+        logger.info("%s ✅ 签到成功%s — %s", tag, chicken_info, message)
+    elif result == "already":
+        logger.info("%s ✅ 已签到（重复） — %s", tag, message)
+    elif result == "forbidden":
+        logger.warning("%s 🚫 被 Cloudflare 拦截 — %s", tag, message)
+    elif result == "fail":
+        logger.warning("%s ❌ 签到失败 — %s", tag, message)
+    elif result == "invalid":
+        logger.warning("%s ⚠️  Cookie 无效 — %s", tag, message)
+    else:
+        logger.error("%s 🔥 签到出错 (result=%s) — %s", tag, result, message)
 
 
 def _run_async(coro) -> None:  # type: ignore[type-arg]
