@@ -366,8 +366,11 @@ def sign(ns_cookie, ns_random):
         msg = data.get("message", "")
         if "鸡腿" in msg or data.get("success"):
             return "success", msg
-        elif "已完成签到" in msg:
+        elif "已完成签到" in msg or "已签到" in msg or "重复" in msg:
             return "already", msg
+        elif response.status_code == 500 and not data.get("success"):
+            # NodeSeek returns HTTP 500 with {success: false} when already signed in today
+            return "already", msg or "今日已签到"
         elif data.get("status") == 404:
             return "invalid", msg
         return "fail", msg
