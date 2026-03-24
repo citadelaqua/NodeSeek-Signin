@@ -30,11 +30,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import NavBar from '../components/NavBar.vue'
 import AccountCard from '../components/AccountCard.vue'
 import ChickenChart from '../components/ChickenChart.vue'
 import { accountsApi, statsApi, type Account, type AccountStats, type GlobalStats } from '../api'
+import { onAccountsRefreshed } from '../composables/useAccountEvents'
 
 const accounts = ref<Account[]>([])
 const globalStats = ref<GlobalStats | null>(null)
@@ -63,10 +64,24 @@ const allDaily = computed(() => {
   return [...map.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([date, chickens]) => ({ date, chickens }))
 })
 
+async function refreshStats() {
+  const statsRes = await statsApi.global()
+  globalStats.value = statsRes.data
+  allStats.value = await Promise.all(accounts.value.map((a) => statsApi.account(a.id).then((r) => r.data)))
+}
+
 onMounted(async () => {
   const [accsRes, statsRes] = await Promise.all([accountsApi.list(), statsApi.global()])
   accounts.value = accsRes.data
   globalStats.value = statsRes.data
   allStats.value = await Promise.all(accounts.value.map((a) => statsApi.account(a.id).then((r) => r.data)))
 })
+
+// Listen for account updates pushed by NavBar after a sign-in poll
+const unsubscribe = onAccountsRefreshed((updated) => {
+  accounts.value = updated
+  refreshStats()
+})
+
+onUnmounted(unsubscribe)
 </script>

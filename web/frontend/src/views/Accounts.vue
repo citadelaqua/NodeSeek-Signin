@@ -59,22 +59,55 @@
       >
         <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-md p-6 flex flex-col gap-4">
           <h2 class="text-base font-bold text-gray-800 dark:text-gray-100">{{ editing ? '编辑账号' : '添加账号' }}</h2>
+
           <label class="flex flex-col gap-1 text-sm text-gray-600 dark:text-gray-400">
             显示名称 *
             <input v-model="form.label" class="input" placeholder="账号1" />
           </label>
+
           <label class="flex flex-col gap-1 text-sm text-gray-600 dark:text-gray-400">
-            Cookie
-            <textarea v-model="form.cookie" class="input min-h-[60px] resize-none" placeholder="ns_uid=...; ns_token=..." />
+            <div class="flex items-center justify-between">
+              <span>Cookie</span>
+              <button
+                type="button"
+                class="text-xs text-indigo-500 hover:text-indigo-700 dark:text-indigo-400 dark:hover:text-indigo-300 flex items-center gap-1 transition"
+                @click="showCookieHelp = !showCookieHelp"
+              >
+                <span>{{ showCookieHelp ? '收起说明 ▲' : '如何获取？▼' }}</span>
+              </button>
+            </div>
+            <!-- Cookie 获取说明 -->
+            <div v-if="showCookieHelp" class="rounded-xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-800 px-3 py-2.5 text-xs text-gray-600 dark:text-gray-300 leading-relaxed space-y-1.5">
+              <p class="font-semibold text-indigo-700 dark:text-indigo-300">🍪 如何获取 NodeSeek Cookie</p>
+              <ol class="list-decimal list-inside space-y-1">
+                <li>用浏览器打开 <a href="https://www.nodeseek.com" target="_blank" class="text-indigo-600 dark:text-indigo-400 underline underline-offset-2">nodeseek.com</a> 并登录</li>
+                <li>按 <kbd class="px-1 py-0.5 rounded bg-gray-200 dark:bg-gray-700 font-mono text-[11px]">F12</kbd> 打开开发者工具</li>
+                <li>切到「<strong>网络 / Network</strong>」标签，刷新页面</li>
+                <li>点击任意一个 nodeseek.com 请求，找到「<strong>请求标头 / Request Headers</strong>」</li>
+                <li>复制 <code class="px-1 rounded bg-gray-200 dark:bg-gray-700 font-mono">Cookie</code> 字段的值粘贴到下方</li>
+              </ol>
+              <p class="text-gray-400 dark:text-gray-500 text-[11px]">💡 也可在「应用 / Application → Cookies」中找到 <code class="font-mono">ns_uid</code> 和 <code class="font-mono">ns_token</code> 两个字段拼成 <code class="font-mono">ns_uid=xxx; ns_token=xxx</code></p>
+            </div>
+            <textarea v-model="form.cookie" class="input min-h-[60px] resize-none font-mono text-xs" placeholder="ns_uid=xxx; ns_token=xxx" />
           </label>
-          <label class="flex flex-col gap-1 text-sm text-gray-600 dark:text-gray-400">
-            用户名（账号密码模式）
-            <input v-model="form.username" class="input" placeholder="可选" />
-          </label>
-          <label class="flex flex-col gap-1 text-sm text-gray-600 dark:text-gray-400">
-            密码
-            <input v-model="form.password" type="password" class="input" placeholder="可选" />
-          </label>
+
+          <details class="group text-sm text-gray-500 dark:text-gray-400">
+            <summary class="cursor-pointer select-none list-none flex items-center gap-1 hover:text-gray-700 dark:hover:text-gray-200 transition">
+              <span class="group-open:rotate-90 transition-transform inline-block">▶</span>
+              账号密码模式（可选，Cookie 失效时自动重新登录）
+            </summary>
+            <div class="mt-3 flex flex-col gap-3">
+              <label class="flex flex-col gap-1">
+                用户名
+                <input v-model="form.username" class="input" placeholder="NodeSeek 用户名" />
+              </label>
+              <label class="flex flex-col gap-1">
+                密码
+                <input v-model="form.password" type="password" class="input" placeholder="NodeSeek 密码" />
+              </label>
+            </div>
+          </details>
+
           <div class="flex gap-3 justify-end mt-2">
             <button class="text-sm px-4 py-2 rounded-xl border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition" @click="showModal = false">取消</button>
             <button class="text-sm px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white transition" @click="saveAccount">保存</button>
@@ -94,6 +127,7 @@ const accounts = ref<Account[]>([])
 const showModal = ref(false)
 const editing = ref<Account | null>(null)
 const form = ref({ label: '', cookie: '', username: '', password: '' })
+const showCookieHelp = ref(false)
 
 async function load() {
   accounts.value = (await accountsApi.list()).data
@@ -104,12 +138,14 @@ onMounted(load)
 function openAdd() {
   editing.value = null
   form.value = { label: '', cookie: '', username: '', password: '' }
+  showCookieHelp.value = false
   showModal.value = true
 }
 
 function openEdit(a: Account) {
   editing.value = a
   form.value = { label: a.label, cookie: a.cookie ?? '', username: a.username ?? '', password: '' }
+  showCookieHelp.value = false
   showModal.value = true
 }
 
